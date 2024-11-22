@@ -2,9 +2,8 @@ import os
 import warnings
 
 from dotenv import load_dotenv
-from langchain.chat_models.gigachat import GigaChat
-
 from hw_1 import LlamaIndex, get_giga, get_prompt, get_prompt_few_shot
+from langchain.chat_models.gigachat import GigaChat
 
 # from langchain.schema import HumanMessage, SystemMessage
 
