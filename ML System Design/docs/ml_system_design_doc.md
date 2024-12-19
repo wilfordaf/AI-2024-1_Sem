@@ -180,7 +180,7 @@
 
 **Распределение классов** `Вид обращения БИА`
 
-![class_distribution_2](../docs/img/plots/class_distribution_2.png)
+![class_distribution_2](../docs/img/plots/class_2_distribution.png)
 
 **Распределение `Услуга БИА` в данных до перевода данных**
 
