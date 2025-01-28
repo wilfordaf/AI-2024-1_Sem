@@ -555,13 +555,61 @@
   - Периодическое переобучение модели.
   - Настройка мониторинга SLA.
 
-#### 5. Отчёт о работе сервиса
+### 5. Отчёт о работе сервиса
 
-**Пример графиков метрик из ClearML**
+#### Пример графиков метрик из ClearML
 
 ![clearml_report](../docs/img/clearml_report.jpg)
 
-**Нагрузочное тестирование**
+#### Нагрузочное тестирование
+
+- Инструмент проведения: Locust
+- Тестируемый признак: среднее время ответа на `/api/v1/predict`
+- Требуемый SLA: ≤ 0.5 секунды
+
+**Используемый скрипт Locust**
+
+```python
+import random
+import csv
+
+from locust import HttpUser, TaskSet, task, between
+
+class PredictTaskSet(TaskSet):
+    def on_start(self):
+        self.data = []
+        with open('input_data.csv', 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                self.data.append(row)
+        if not self.data:
+            raise ValueError("CSV file is empty or data is not loaded.")
+
+    @task
+    def post_predict(self):
+        record = random.choice(self.data)
+
+        issue_key = f"IMJSD-{random.randint(100_000, 999_999)}"
+
+        payload = {
+            "issue_key": issue_key,
+            "title": record['title'],
+            "text": record['text']
+        }
+
+        with self.client.post("/api/v1/predict", json=payload, catch_response=True) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Failed with status code {response.status_code}")
+
+class PredictUser(HttpUser):
+    tasks = [PredictTaskSet]
+    wait_time = between(1, 5)
+```
+
+**Результаты теста**
+
 Время ответа на `/api/v1/predict` = 0.476 при RPS=5 на дистанции в 6000 запросов, тест пройден.
 
 ![grafana](../docs/img/grafana.png)
